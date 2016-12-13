@@ -1,4 +1,4 @@
 #!/bin/bash
 
-yum update -y
+yum update kernel* -y
 reboot

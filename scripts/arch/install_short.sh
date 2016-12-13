@@ -134,6 +134,7 @@ chmod 0755 $get_yaourt
 # Execute as non-root user
 /usr/bin/echo "su - vagrant $get_yaourt" | arch-chroot /mnt /bin/bash
 
+sleep 3600
 # Clean up the script
 rm $get_yaourt_setup
 

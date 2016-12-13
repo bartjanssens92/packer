@@ -42,6 +42,7 @@
       "scripts/centos/update.sh",
       "scripts/centos/centos7-packages.sh",
       "scripts/vboxguest.sh",
+      "scripts/centos/centos7-packages-cleanup.sh",
       "scripts/centos/puppet.sh"
     ]
   }]
