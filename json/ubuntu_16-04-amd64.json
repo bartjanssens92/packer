@@ -51,9 +51,10 @@
     "type": "shell",
     "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'",
     "scripts": [
-      "scripts/vagrant.sh",
       "scripts/vboxguest.sh",
-      "scripts/ubuntu/puppet.sh"
+      "scripts/ubuntu/update.sh",
+      "scripts/vagrant.sh",
+      "scripts/ubuntu/puppet16.sh"
     ]
   }]
 }
