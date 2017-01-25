@@ -21,7 +21,7 @@ do
 	then
 		# Get the free space in the home mount point via df
 		# Returns the free space in Bytes
-		free_space=$( df | grep '/home' | awk '{ print $4 }' )
+		free_space=$( df . | awk '{ print $4 }' )
 		# Make sure that there is at least 1 GB free space before building
 		# 1 GB = 1024^2 = 1048576
 		if (( $free_space < 1048576 ))
