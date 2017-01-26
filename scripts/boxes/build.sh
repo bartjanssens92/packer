@@ -16,10 +16,12 @@ EOFhelp
 # Where to find the .json files
 check_params () {
   echo "checking params"
-  if [[ -z $base_dir ]]; then base_dir='../../'; fi
+  if [[ -z $base_dir ]]; then base_dir='./'; fi
+  if [[ -z $script_dir ]]; then script_dir='./script/boxes/'; fi
   if [[ -z $debug ]]; then debug=false; fi
   if [[ -z $output_dir ]]; then quit 'Error: Must specify output directory' '3'; fi
   if [[ "${output_dir: -1}" != '/' ]]; then output_dir=$( echo "$output_dir/" ); fi
+  if [[ "${script_dir: -1}" != '/' ]]; then script_dir=$( echo "$script_dir/" ); fi
   json_dir="${base_dir}json/"
   build_dir="${base_dir}build/"
 }
@@ -56,6 +58,11 @@ getcliargs () {
       --basedir|-b)
         shift
         base_dir=$1
+        shift
+        ;;
+      --scriptdir|-s)
+        shift
+        script_dir=$1
         shift
         ;;
       --debug|-d)
@@ -99,17 +106,16 @@ do
 			exit 1
 		else
 		        echo "Building box: $box"
-		        echo "packer build ${json_dir}${box}"
-            touch ${build_dir}${boxname}.box
+		        packer build ${json_dir}${box}
             # If the build was successfull
             # move the box to the correct dir
             create_tree $boxname
             mv ${build_dir}${boxname}.box ${output_dir}/${boxname}/boxes/${boxname}-${version}.box
             if $debug
             then
-              ./build-json.py -b ${boxname} -d -o ${output_dir}
+              ${}build-json.py -b ${boxname} -d -o ${output_dir}
             else
-              ./build-json.py -b ${boxname} -o ${output_dir}
+              ${}build-json.py -b ${boxname} -o ${output_dir}
             fi
 		        echo "Cleaning cache folder"
 		        rm packer_cache/*.iso
