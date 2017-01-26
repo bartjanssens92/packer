@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# Script to build the json metadata file
 # An entry looks like this:
 #{
 #    "name": "arch-amd64-virtualbox",
@@ -22,16 +21,21 @@ import time
 import hashlib
 # Import os for some checking an moving files
 import os
+# Import sys and getopts for option passing
+import getopt, sys
 
 # Functions
+def usage():
+    print("Script to build the json metadata file")
+
 def debug(message):
     if ( setdebug ):
         print("DEBUG: " + message)
 
 # Function to generate the basic metadata stucture
-def createbasefile():
+def createbasefile(metadatafile,boxname):
     # Create the base setup
-    newmetadata = {"name": metadatafile[:-5].replace("./", ""), "description": "Description goes here", "versions":[]}
+    newmetadata = {"name": boxname, "description": "Description goes here", "versions":[]}
     # Create the json object
     newmetadatacontent = json.dumps(newmetadata, indent=2)
     # Create the file, add the content and save it.
@@ -40,22 +44,28 @@ def createbasefile():
     newmetadatafile.closed
 
 # Function to generate the json needed to define a new version of a box
-def addbox():
+def addbox(boxname,urlbase,metadatacontent,metadatafile,outputdir):
     # Version is date reversed: YY.MM.DD
     version = time.strftime("%y.%m.%d")
     debug("version: " + version)
+    # Build the location of the box
+    location = "/" + boxname[:-4] + "/boxes/" + boxname[:-4] + "-" + version.replace(".", "-") + ".box"
     # Generate the sha1 of the box
     debug('Generating sha1 sum')
-    sha1box = sha1sum(boxname)
+    sha1box = sha1sum(outputdir + '/' + location)
     debug("sha1: " + sha1box)
     # Build the url
     # https://boxes.bbqnetwork.be / arch-amd64-virtualbox /boxes/ arch-amd64-virtualbox - 17-01-17 .box
-    url = urlbase + "/" + boxname[:-4] + "/boxes/" + boxname[:-4] + "-" + version.replace(".", "-") + ".box"
+    url = urlbase + location
     debug("url: " + url)
     # Build the new version
     newbox = {"version": version, "providers": [{"name": "virtualbox", "url": url, "checksum_type": "sha1", "checksum": sha1box}]}
     # Append the new box the the other versions
     metadatacontent['versions'].append(newbox)
+    # Write the content to the file
+    with open(metadatafile, 'w+') as newmetadatafile:
+        newmetadatafile.write(json.dumps(metadatacontent, indent=2))
+    newmetadatafile.closed
 
 # Function to calculate the sha1 of a file
 def sha1sum(file):
@@ -69,41 +79,84 @@ def sha1sum(file):
     file.closed
     return sha1.hexdigest()
 
-# TODO: make it possilble to pass params to this script!
-metadatafile = './centos-7.1-amd64-virtualbox.json'
-urlbase = "https://boxes.bbqnetwork.be"
 
-setdebug = True
-debug("debug: " + str(setdebug))
+def main():
+    # Make setdebug global
+    global setdebug
+    # Parse params
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "u:b:o:vdh", ["help", "verbose", "debug", "url=", "box=", "output="])
+    except getopt.GetoptError as err:
+        print(str(err))
+        usage()
+        sys.exit(2)
+    # Defaults
+    metadatafile = './empty.json'
+    urlbase = "https://boxes.bbqnetwork.be"
+    outputdir = "."
+    setdebug = False
+    # Check if options where passed
+    if len(opts) == 0:
+        usage()
+        sys.exit(2)
+    # Loop through the options
+    for option, argument in opts:
+        if option in ("-v", "-d", "--debug", "--verbose"):
+            setdebug = True
+            debug("debug: " + str(setdebug))
+        elif option in ("-h", "--help"):
+            usage()
+        elif option in ("-u", "--url"):
+            urlbase = argument
+        elif option in ("-b", "--box"):
+            metadatafile = argument
+        elif option in ("-o", "--output"):
+            outputdir = argument
+        else:
+            # If there are no more arguments left,
+            # do the main thing
+            usage()
+    debug("Doing the main thing")
+    createmetadata(metadatafile, urlbase,outputdir)
+    sys.exit(0)
 
-# Check if the file exists
-if not (os.path.isfile(metadatafile)):
-    debug("file, '" + metadatafile + "' does not exist!")
-    createbasefile()
+def createmetadata(metadatafile,urlbase,outputdir):
+    # Build the full file path
+    fullpathmetadatafile =  outputdir + '/' + metadatafile + '/' + metadatafile + '.json'
+    # Derive the boxname from the metadatafile name
+    boxnamefrommetadatafile = metadatafile
+    # Check if the file exists
+    if not (os.path.isfile(fullpathmetadatafile)):
+        debug('Creating new metadatafile: ' + fullpathmetadatafile)
+        createbasefile(fullpathmetadatafile,boxnamefrommetadatafile)
 
-# Start by opening the file
-with open(metadatafile, 'r') as file:
-    metadatacontent = json.load(file)
-file.closed
+    debug("Loading json from: " + fullpathmetadatafile)
+    # Start by opening the file
+    with open(fullpathmetadatafile, 'r') as file:
+        metadatacontent = json.load(file)
+    file.closed
 
-# Assume that the name is also the name of the box
-boxname = metadatacontent['name'] + '.box'
-debug("boxname: " + boxname)
+    # Assume that the name is also the name of the box
+    boxname = metadatacontent['name'] + '.box'
+    debug("boxname: " + boxname)
 
-# Check the amount of versions
-if ( len(metadatacontent['versions']) == 2 ):
-    # Move the second element to the first
-    toremove = metadatacontent['versions'][0]['version']
-    debug('box to remove: ' + toremove)
-    metadatacontent['versions'][0] = metadatacontent['versions'][1]
-    # Remove the last element
-    metadatacontent['versions'].pop()
-    # Add a new box to the array
-    addbox()
-else:
-    # Add a new box to the array
-    addbox()
+    # Check the amount of versions
+    if ( len(metadatacontent['versions']) == 2 ):
+        # Move the second element to the first
+        toremove = metadatacontent['versions'][0]['version']
+        debug('box to remove: ' + toremove)
+        metadatacontent['versions'][0] = metadatacontent['versions'][1]
+        # Remove the last element
+        metadatacontent['versions'].pop()
+        # Add a new box to the array
+        addbox(boxname,urlbase,metadatacontent,fullpathmetadatafile,outputdir)
+    else:
+        # Add a new box to the array
+        addbox(boxname,urlbase,metadatacontent,fullpathmetadatafile,outputdir)
 
-# Print the result pretty
-debug("Pretty print: ")
-print(json.dumps(metadatacontent, indent=2))
+    # Print the result pretty
+    debug("Pretty print: ")
+    debug(json.dumps(metadatacontent, indent=2))
+
+if __name__ == '__main__':
+  main()
