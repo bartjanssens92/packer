@@ -3,17 +3,26 @@
 show_help () {
   cat << EOFhelp
     Script to build packer boxes automagically.
+
+    Options:
+
+    -o | --outputdir: Where to build the directory structure.
+    -b | --basedir:   Where the root of the packer repo is.
+    -d | --debug:     Echo some more values
+
 EOFhelp
 }
 
 # Where to find the .json files
-base_dir='../../'
-json_dir="${base_dir}json/"
-build_dir="${base_dir}build/"
-output_dir="/home/bjanssens/output/"
-
-# Get all the files
-available_boxes=$( ls -1 ${json_dir} )
+check_params () {
+  echo "checking params"
+  if [[ -z $base_dir ]]; then base_dir='../../'; fi
+  if [[ -z $debug ]]; then debug=false; fi
+  if [[ -z $output_dir ]]; then quit 'Error: Must specify output directory' '3'; fi
+  if [[ "${output_dir: -1}" != '/' ]]; then output_dir=$( echo "$output_dir/" ); fi
+  json_dir="${base_dir}json/"
+  build_dir="${base_dir}build/"
+}
 
 # Create tree for boxes
 create_tree () {
@@ -35,7 +44,40 @@ create_tree () {
   fi
 }
 
+getcliargs () {
+  while test -n "$1"
+  do
+    case "$1" in
+      --outputdir|-o)
+        shift
+        output_dir=$1
+        shift
+        ;;
+      --basedir|-b)
+        shift
+        base_dir=$1
+        shift
+        ;;
+      --debug|-d)
+        debug=true
+        shift
+        ;;
+      *)
+        show_help
+        exit 1
+    esac
+  done
+}
+
 # Main loop
+# Get the cli options
+getcliargs $@
+check_params
+
+# Get all the files
+available_boxes=$( ls -1 ${json_dir} )
+
+
 # Version is based on days
 version=$( date +%y-%m-%d )
 for box in $available_boxes
@@ -48,7 +90,7 @@ do
 	then
 		# Get the free space in the home mount point via df
 		# Returns the free space in Bytes
-		free_space=$( df . | tail -n 1 | awk '{ print $4 }' )
+		free_space=$( df ${output_dir} | tail -n 1 | awk '{ print $4 }' )
 		# Make sure that there is at least 1 GB free space before building
 		# 1 GB = 1024^2 = 1048576
 		if (( $free_space < 1048576 ))
@@ -62,8 +104,13 @@ do
             # If the build was successfull
             # move the box to the correct dir
             create_tree $boxname
-            mv ${build_dir}${boxname}.box ${output_dir}${boxname}/boxes/${boxname}-${version}.box
-            ./build-json.py -b ${boxname} -d -o ${output_dir}
+            mv ${build_dir}${boxname}.box ${output_dir}/${boxname}/boxes/${boxname}-${version}.box
+            if $debug
+            then
+              ./build-json.py -b ${boxname} -d -o ${output_dir}
+            else
+              ./build-json.py -b ${boxname} -o ${output_dir}
+            fi
 		        echo "Cleaning cache folder"
 		        rm packer_cache/*.iso
 		fi
