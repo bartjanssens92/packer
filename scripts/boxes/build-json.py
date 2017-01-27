@@ -122,7 +122,7 @@ def main():
 
 def createmetadata(metadatafile,urlbase,outputdir):
     # Build the full file path
-    fullpathmetadatafile =  outputdir + '/' + metadatafile + '/' + metadatafile + '.json'
+    fullpathmetadatafile =  outputdir + '/' + metadatafile + '/box.json'
     # Derive the boxname from the metadatafile name
     boxnamefrommetadatafile = metadatafile
     # Check if the file exists
