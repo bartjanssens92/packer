@@ -5,14 +5,17 @@
     "headless": true,
 
     "guest_os_type": "Ubuntu_64",
-    "iso_url": "http://releases.ubuntu.com/12.04.5/ubuntu-12.04.5-server-amd64.iso",
-    "iso_checksum": "769474248a3897f4865817446f9a4a53",
+    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
+    "iso_checksum": "d2d939ca0e65816790375f6826e4032f",
     "iso_checksum_type": "md5",
 
     "boot_command": [
-      "<esc><esc><enter><wait>",
+      "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
       "/install/vmlinuz noapic ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu-12.04-amd64/preseed.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu-16.04-amd64/preseed.cfg ",
       "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
       "hostname={{ .Name }} ",
       "fb=false debconf/frontend=noninteractive ",
@@ -20,7 +23,7 @@
       "initrd=/install/initrd.gz -- <enter>"
     ],
 
-    "boot_wait": "12s",
+    "boot_wait": "10s",
 
     "http_directory": "http",
     "guest_additions_path": "VBoxGuestAdditions_{{ .Version }}.iso",
@@ -40,7 +43,7 @@
   }],
 
   "post-processors": [{
-    "output": "build/ubuntu-12.04-amd64-puppet-{{.Provider}}.box",
+    "output": "build/ubuntu-16-04-amd64-{{.Provider}}.box",
     "type": "vagrant"
   }],
 
@@ -48,9 +51,10 @@
     "type": "shell",
     "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'",
     "scripts": [
-      "scripts/vagrant.sh",
       "scripts/vboxguest.sh",
-      "scripts/ubuntu/puppet.sh"
+      "scripts/ubuntu/update.sh",
+      "scripts/vagrant.sh",
+      "scripts/ubuntu/puppet16.sh"
     ]
   }]
 }

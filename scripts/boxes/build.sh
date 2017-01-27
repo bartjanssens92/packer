@@ -17,13 +17,16 @@ EOFhelp
 check_params () {
   echo "checking params"
   if [[ -z $base_dir ]]; then base_dir='./'; fi
-  if [[ -z $script_dir ]]; then script_dir='./script/boxes/'; fi
+  if [[ -z $script_dir ]]; then script_dir='./scripts/boxes/'; fi
   if [[ -z $debug ]]; then debug=false; fi
   if [[ -z $output_dir ]]; then quit 'Error: Must specify output directory' '3'; fi
   if [[ "${output_dir: -1}" != '/' ]]; then output_dir=$( echo "$output_dir/" ); fi
   if [[ "${script_dir: -1}" != '/' ]]; then script_dir=$( echo "$script_dir/" ); fi
   json_dir="${base_dir}json/"
   build_dir="${base_dir}build/"
+  # Check if the output_dir exists,
+  # otherwise make it.
+  if [[ ! -d $output_dir ]]; then mkdir -p $output_dir; fi
 }
 
 # Create tree for boxes
@@ -84,7 +87,6 @@ check_params
 # Get all the files
 available_boxes=$( ls -1 ${json_dir} )
 
-
 # Version is based on days
 version=$( date +%y-%m-%d )
 for box in $available_boxes
@@ -110,12 +112,18 @@ do
             # If the build was successfull
             # move the box to the correct dir
             create_tree $boxname
+            # Move the box to the tree
+            echo "Moving box to the tree:"
+            echo "mv ${build_dir}${boxname}.box ${output_dir}/${boxname}/boxes/${boxname}-${version}.box"
             mv ${build_dir}${boxname}.box ${output_dir}/${boxname}/boxes/${boxname}-${version}.box
+            # Generate the metadata
+            echo "Createing metadata for ${boxname} located in ${output_dir}"
             if $debug
             then
-              ${}build-json.py -b ${boxname} -d -o ${output_dir}
+              echo "${script_dir}build-json.py -b ${boxname} -d -o ${output_dir}"
+              ${script_dir}build-json.py -b ${boxname} -d -o ${output_dir}
             else
-              ${}build-json.py -b ${boxname} -o ${output_dir}
+              ${script_dir}build-json.py -b ${boxname} -o ${output_dir}
             fi
 		        echo "Cleaning cache folder"
 		        rm packer_cache/*.iso

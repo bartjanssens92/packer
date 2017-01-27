@@ -1,14 +1,25 @@
 {
   "builders": [{
     "type": "virtualbox-iso",
+    "virtualbox_version_file": ".vbox_version",
     "headless": true,
 
-    "guest_os_type": "RedHat_64",
-    "iso_url": "http://centos.mirror.nucleus.be/7.2.1511/isos/x86_64/CentOS-7-x86_64-Minimal-1511.iso",
-    "iso_checksum": "88c0437f0a14c6e2c94426df9d43cd67",
+    "guest_os_type": "Ubuntu_64",
+    "iso_url": "http://releases.ubuntu.com/12.04.5/ubuntu-12.04.5-server-amd64.iso",
+    "iso_checksum": "769474248a3897f4865817446f9a4a53",
     "iso_checksum_type": "md5",
 
-    "boot_command": ["<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos-7.2-amd64/ks.cfg<enter><wait>"],
+    "boot_command": [
+      "<esc><esc><enter><wait>",
+      "/install/vmlinuz noapic ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu-12.04-amd64/preseed.cfg ",
+      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+      "hostname={{ .Name }} ",
+      "fb=false debconf/frontend=noninteractive ",
+      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+      "initrd=/install/initrd.gz -- <enter>"
+    ],
+
     "boot_wait": "12s",
 
     "http_directory": "http",
@@ -19,7 +30,6 @@
     "ssh_password": "vagrant",
     "ssh_port": 22,
     "ssh_wait_timeout": "3600s",
-    "ssh_pty" : "true",
 
     "disk_size": 10240,
     "vboxmanage": [
@@ -30,7 +40,7 @@
   }],
 
   "post-processors": [{
-    "output": "build/centos-7.2-amd64-{{.Provider}}.box",
+    "output": "build/ubuntu-12-04-amd64-{{.Provider}}.box",
     "type": "vagrant"
   }],
 
@@ -39,11 +49,8 @@
     "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'",
     "scripts": [
       "scripts/vagrant.sh",
-      "scripts/centos/update.sh",
-      "scripts/centos/centos7-packages.sh",
       "scripts/vboxguest.sh",
-      "scripts/centos/centos7-packages-cleanup.sh",
-      "scripts/centos/puppet.sh"
+      "scripts/ubuntu/puppet.sh"
     ]
   }]
 }
