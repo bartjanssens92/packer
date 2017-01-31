@@ -8,7 +8,8 @@ show_help () {
 
     -o | --outputdir: Where to build the directory structure.
     -b | --basedir:   Where the root of the packer repo is.
-    -d | --debug:     Echo some more values
+    -d | --debug:     Echo some more values.
+    -t | --test:      Don't build boxes but touch files.
 
 EOFhelp
 }
@@ -20,6 +21,8 @@ check_params () {
   if [[ -z $script_dir ]]; then script_dir='./scripts/boxes/'; fi
   if [[ -z $log_dir ]]; then log_dir='./log'; fi
   if [[ -z $set_debug ]]; then set_debug=false; fi
+  if [[ -z $cache_cleanup ]]; then cache_cleanup=false; fi
+  if [[ -z $set_test ]]; then set_test=false; cachecleanup=false; fi
   if [[ -z $output_dir ]]; then quit 'Error: Must specify output directory' '3'; fi
   if [[ "${output_dir: -1}" != '/' ]]; then output_dir=$( echo "$output_dir/" ); fi
   if [[ "${script_dir: -1}" != '/' ]]; then script_dir=$( echo "$script_dir/" ); fi
@@ -72,8 +75,16 @@ getcliargs () {
         script_dir=$1
         shift
         ;;
+      --test|-t)
+        set_test=true
+        shift
+        ;;
       --debug|-d)
         debug=true
+        shift
+        ;;
+      --cachecleanup)
+        cache_cleanup=true
         shift
         ;;
       *)
@@ -125,16 +136,21 @@ do
     else
       # Start the box building
       echo "Building box: $box"
-      if $set_debug
+      if ! $set_test
       then
-        #echo "packer build ${json_dir}${box}" | tee -a ${log_dir}${boxname}
-        packer build ${json_dir}${box} | tee -a ${log_dir}${boxname}
+        if $set_debug
+        then
+          #echo "packer build ${json_dir}${box}" | tee -a ${log_dir}${boxname}
+          packer build ${json_dir}${box} | tee -a ${log_dir}${boxname}
+        else
+          #echo "packer build ${json_dir}${box}" &> ${log_dir}${boxname}
+          packer build ${json_dir}${box} &> ${log_dir}${boxname}
+        fi
       else
-        #echo "packer build ${json_dir}${box}" &> ${log_dir}${boxname}
-        packer build ${json_dir}${box} &> ${log_dir}${boxname}
+        # Debuging
+        echo "packer build ${json_dir}${box}" &> ${log_dir}${boxname}
+        touch "${build_dir}${boxname}.box"
       fi
-      # Debuging
-      # touch "${build_dir}${boxname}.box"
       # If the build was successfull
       # move the box to the correct dir
       create_tree $boxname
@@ -149,10 +165,13 @@ do
         debug "${script_dir}build-json.py -b ${boxname} -d -o ${output_dir}"
         ${script_dir}build-json.py -b ${boxname} -d -o ${output_dir} | tee -a ${log_dir}${boxname}
       else
-        ${script_dir}build-json.py -b ${boxname} -o ${output_dir} &>> ${log_dir}${boxname} 
+        ${script_dir}build-json.py -b ${boxname} -o ${output_dir} &>> ${log_dir}${boxname}
       fi
-      debug "Cleaning cache folder"
-      rm packer_cache/*.iso
+      if $cache_cleanup
+      then
+        debug "Cleaning cache folder"
+        rm packer_cache/*.iso
+      fi
     fi
   fi
 done
