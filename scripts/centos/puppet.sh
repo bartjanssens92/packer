@@ -1,6 +1,6 @@
 #!/usr/vin/env bash
 
-if cat /etc/redhat-release | grep 6 &>/dev/null
+if cat /etc/redhat-release | grep ' 6' &>/dev/null
 then
   # CentOS 6.8 (Final)
   echo "Centos 6"

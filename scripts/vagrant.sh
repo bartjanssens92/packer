@@ -3,7 +3,7 @@
 echo 'Create the .ssh directory'
 mkdir /home/vagrant/.ssh
 echo 'Get the vagrant.pub key'
-if curl &>/dev/null
+if curl -h&>/dev/null
 then
   curl -O -s 'https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub'
 else
