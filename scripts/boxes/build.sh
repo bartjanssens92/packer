@@ -18,6 +18,7 @@ EOFhelp
 check_params () {
   echo "checking params"
   if [[ -z $base_dir ]]; then base_dir='./'; fi
+  if [[ -z $base_url ]]; then base_url='https://boxes.bbqnetwork.be'; fi
   if [[ -z $script_dir ]]; then script_dir='./scripts/boxes/'; fi
   if [[ -z $log_dir ]]; then log_dir='./log'; fi
   if [[ -z $set_debug ]]; then set_debug=false; fi
@@ -29,6 +30,9 @@ check_params () {
   if [[ "${log_dir: -1}" != '/' ]]; then log_dir=$( echo "$log_dir/" ); fi
   json_dir="${base_dir}json/"
   build_dir="${base_dir}build/"
+  tempfile='/tmp/buildboxes'
+  date_format=$( date +%d-%m-%y )
+  log_suffix="$date_format.log"
   # Check if the output_dir exists,
   # otherwise make it.
   if [[ ! -d $output_dir ]]; then echo "Creating output directory: $output_dir"; mkdir -p $output_dir; fi
@@ -114,6 +118,11 @@ check_params
 # Get all the files
 available_boxes=$( ls -1 ${json_dir} )
 
+# Clean out the tmpfile
+if [ -f $tempfile ]; then
+  echo '' > $tempfile
+fi
+
 # Version is based on days
 version=$( date +%y-%m-%d )
 for box in $available_boxes
@@ -141,15 +150,18 @@ do
         if $set_debug
         then
           #echo "packer build ${json_dir}${box}" | tee -a ${log_dir}${boxname}
-          packer build ${json_dir}${box} | tee -a ${log_dir}${boxname}
+          packer build ${json_dir}${box} | tee -a ${log_dir}${boxname}${log_suffix}
+          echo "$boxname" >> $tempfile
         else
           #echo "packer build ${json_dir}${box}" &> ${log_dir}${boxname}
-          packer build ${json_dir}${box} &> ${log_dir}${boxname}
+          packer build ${json_dir}${box} &> ${log_dir}${boxname}${log_suffix}
+          echo "$boxname" >> $tempfile
         fi
       else
         # Debuging
-        echo "packer build ${json_dir}${box}" &> ${log_dir}${boxname}
+        echo "packer build ${json_dir}${box}" &> ${log_dir}${boxname}${log_suffix}
         touch "${build_dir}${boxname}.box"
+        echo "$boxname" >> $tempfile
       fi
       # If the build was successfull
       # move the box to the correct dir
@@ -163,9 +175,9 @@ do
       if $set_debug
       then
         debug "${script_dir}build-json.py -b ${boxname} -d -o ${output_dir}"
-        ${script_dir}build-json.py -b ${boxname} -d -o ${output_dir} | tee -a ${log_dir}${boxname}
+        ${script_dir}build-json.py -b ${boxname} -d -o ${output_dir} | tee -a ${log_dir}${boxname}${log_suffix}
       else
-        ${script_dir}build-json.py -b ${boxname} -o ${output_dir} &>> ${log_dir}${boxname}
+        ${script_dir}build-json.py -b ${boxname} -o ${output_dir} &>> ${log_dir}${boxname}${log_suffix}
       fi
       if $cache_cleanup
       then
@@ -175,3 +187,37 @@ do
     fi
   fi
 done
+
+# Build the index box list
+# Clear the current indexfile
+if [[ -f $output_dir/index.html ]]
+then
+  echo '' > ${output_dir}/index.html
+fi
+
+# Add the top to it
+cat ${base_dir}/html/index-top.html > ${output_dir}/index.html
+
+# Add the entries
+preurl="${base_url}/"
+posturl=" </a> </li>"
+for box in $( cat $tempfile )
+do
+  echo "<li> <a href=\"${preurl}${box}\"> ${box}${posturl}" >> ${output_dir}/index.html
+done
+
+# Add the bottom
+cat ${base_dir}/html/index-bottom.html >> ${output_dir}/index.html
+
+# Make the logs available
+# make the log dir
+if [[ ! -d ${output_dir}buildlogs ]]
+then
+  mkdir ${output_dir}buildlogs
+fi
+
+# Move the log files to the log dir
+cp ${log_dir}*.log ${output_dir}buildlogs/
+
+# Clean up the tmpfile
+rm $tempfile

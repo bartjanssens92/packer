@@ -2,3 +2,4 @@ packer_cache/
 build/
 output-virtualbox-iso/
 *.swp
+log/
