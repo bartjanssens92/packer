@@ -1,14 +1,17 @@
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   </head>
   <body>
-    <h1> Boxes </h1>
-    <p> Boxes.bbqnetwork.be is a collection of vagrant boxes. Here they are served for vagrant to use. </p>
-    <p> They are build weekly using packer from <a href='https://github.com/bartjanssens92/packer'>this repository.</a>
-    <p> Add the following lines in the Vagrantfile to start using the boxes: </p>
-    <pre>
-      config.vm.box = "arch-amd64-virtualbox"
-      config.vm.box_url = "https://boxes.bbqnetwork.be/arch-amd64-virtualbox"
-    </pre>
-    <h1> Available boxes </h1>
-      <ul>
+    <div class='col-md-2'></div>
+    <div class='col-md-8'>
+      <h1> Boxes </h1>
+      <p> Boxes.bbqnetwork.be is a collection of vagrant boxes. Here they are served for vagrant to use. </p>
+      <p> They are build weekly using packer from <a href='https://github.com/bartjanssens92/packer'>this repository.</a>
+      <p> Add the following lines in the Vagrantfile to start using the boxes: </p>
+      <pre>
+        config.vm.box = "arch-amd64-virtualbox"
+        config.vm.box_url = "https://boxes.bbqnetwork.be/arch-amd64-virtualbox"
+      </pre>
+      <h1> Available boxes </h1>
+        <ul>
