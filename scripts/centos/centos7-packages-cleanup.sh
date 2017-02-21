@@ -5,4 +5,5 @@
 
 yum remove epel-release -y
 yum remove gcc kernel-devel kernel-headers dkms make bzip2 perl -y
+
 reboot
