@@ -23,8 +23,6 @@ sgdisk /dev/vda --new=2:0:0 --typecode=2:8e00
 /usr/bin/mount /dev/vda1 /mnt/boot
 
 # Install the base system
-#/usr/bin/pacstrap /mnt base base-devel openssh syslinux virtualbox-guest-utils
-#/usr/bin/pacstrap /mnt base base-devel openssh syslinux linux-lts virtualbox-guest-modules-arch virtualbox-guest-utils-nox puppet
 /usr/bin/pacstrap /mnt base base-devel openssh syslinux linux-lts puppet
 
 # Generate the fstab
@@ -57,9 +55,13 @@ uuid=$( /usr/bin/blkid -s UUID -o value /dev/mapper/arch-root )
 echo 'useradd -U -G wheel -m -s /bin/bash vagrant' | arch-chroot /mnt /bin/bash
 echo "echo 'vagrant:vagrant' | chpasswd" | arch-chroot /mnt /bin/bash
 
+echo "echo 'root:root' | chpasswd" | arch-chroot /mnt /bin/bash
+
+# Set the permissions
+echo 'vagrant  ALL=(ALL) NOPASSWD: ALL' >> /mnt/etc/sudoers
+
 # Add the ssh key
 mkdir /mnt/home/vagrant/.ssh
-echo 'vagrant  ALL=(ALL) NOPASSWD: ALL' >> /mnt/etc/sudoers
 wget --no-check-certificate -O authorized_keys 'https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub' -q
 mv authorized_keys /mnt/home/vagrant/.ssh/
 chown -R vagrant:vagrant /mnt/home/vagrant/.ssh
