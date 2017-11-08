@@ -10,6 +10,7 @@ sgdisk /dev/sda --new=2:0:0 --typecode=2:8e00
 /usr/bin/vgcreate arch /dev/sda2
 /usr/bin/lvcreate -L 4G -n var arch
 /usr/bin/lvcreate -l 100%FREE -n root arch
+/usr/bin/vgchange -ay
 
 # Format the partitions
 /usr/bin/mkfs.fat  /dev/sda1
@@ -27,7 +28,7 @@ echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacm
 
 # Install the base system
 #/usr/bin/pacstrap /mnt base base-devel openssh syslinux virtualbox-guest-utils
-/usr/bin/pacstrap /mnt base base-devel openssh syslinux linux-lts virtualbox-guest-modules-arch virtualbox-guest-utils-nox puppet
+/usr/bin/pacstrap /mnt base base-devel openssh syslinux virtualbox-guest-modules-arch virtualbox-guest-utils-nox puppet
 
 # Generate the fstab
 /usr/bin/genfstab -U /mnt > /mnt/etc/fstab
@@ -37,14 +38,14 @@ echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacm
 /usr/bin/echo '/usr/bin/locale-gen' | /usr/bin/arch-chroot /mnt /bin/bash
 
 # Setup time
-/usr/bin/ln -s /usr/share/zoneinfo/Europe/Brussels /mnt/etc/localtime
+/usr/bin/ln -s /mnt/usr/share/zoneinfo/Europe/Brussels /mnt/etc/localtime
 /usr/bin/echo 'hwclock --systohc --utc' | /usr/bin/arch-chroot /mnt /bin/bash
 
 # Setup hostname
 /usr/bin/echo "arch-hostname" > /mnt/etc/hostname
 
 # Add lvm2 hook to HOOKS in /etc/mkinitcpio.conf
-/usr/bin/sed -i 's/HOOKS=\".*\"/HOOKS=\"base udev autodetect modconf block lvm2 filesystems keyboard fsck\"/g' /mnt/etc/mkinitcpio.conf
+/usr/bin/sed -i 's/^HOOKS=.*/HOOKS=\(base udev autodetect modconf block lvm2 filesystems keyboard fsck\)/g' /mnt/etc/mkinitcpio.conf
 /usr/bin/echo 'mkinitcpio -p linux' | arch-chroot /mnt /bin/bash
 
 # Generate syslinux
