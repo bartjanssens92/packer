@@ -1,0 +1,49 @@
+{
+  "builders": [{
+    "type": "virtualbox-iso",
+    "headless": true,
+
+    "guest_os_type": "RedHat_64",
+    "iso_url": "/home/bjanssens/Downloads/rhel-server-7.3-x86_64-dvd.iso",
+    "iso_checksum": "120acbca7b3d55465eb9f8ef53ad7365f2997d42d4f83d7cc285bf5c71e1131f",
+    "iso_checksum_type": "sha256",
+
+    "boot_command": ["<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/rhel-7.3-amd64/ks.cfg<enter><wait>"],
+    "boot_wait": "12s",
+
+    "http_directory": "http",
+    "guest_additions_path": "VBoxGuestAdditions_{{ .Version }}.iso",
+    "virtualbox_version_file": "/home/vagrant/.vbox_version",
+
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_port": 22,
+    "ssh_wait_timeout": "3600s",
+    "ssh_pty" : "true",
+
+    "disk_size": 25600,
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--memory", "1024"],
+      ["modifyvm", "{{.Name}}", "--cpus", "1"]
+    ],
+    "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now"
+  }],
+
+  "post-processors": [{
+    "output": "build/rhel-7-3-amd64-{{.Provider}}.box",
+    "type": "vagrant"
+  }],
+
+  "provisioners": [{
+    "type": "shell",
+    "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'",
+    "expect_disconnect": true,
+    "scripts": [
+      "scripts/vagrant.sh",
+      "scripts/rhel/rhel7-packages.sh",
+      "scripts/rhel/vboxguest.sh",
+      "scripts/rhel/rhel7-packages-cleanup.sh",
+      "scripts/rhel/puppet.sh"
+    ]
+  }]
+}
