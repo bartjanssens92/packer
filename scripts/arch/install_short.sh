@@ -1,33 +1,15 @@
 #!/bin/bash
 
-# Partition the disk
-sgdisk /dev/sda
-sgdisk /dev/sda --new=1:0:+512M --typecode=1:ef00
-sgdisk /dev/sda --new=2:0:0 --typecode=2:8e00
-
-# Create the lv
-/usr/bin/pvcreate /dev/sda2
-/usr/bin/vgcreate arch /dev/sda2
-/usr/bin/lvcreate -L 4G -n var arch
-/usr/bin/lvcreate -l 100%FREE -n root arch
-/usr/bin/vgchange -ay
-
 # Format the partitions
-/usr/bin/mkfs.fat  /dev/sda1
-/usr/bin/mkfs.ext4 /dev/mapper/arch-root
-/usr/bin/mkfs.ext4 /dev/mapper/arch-var
+mkfs.btrfs /dev/sda
 
 # Mount the partitions
-/usr/bin/mount /dev/mapper/arch-root /mnt
-/usr/bin/mkdir /mnt/var /mnt/boot
-/usr/bin/mount /dev/mapper/arch-var /mnt/var
-/usr/bin/mount /dev/sda1 /mnt/boot
+mount /dev/sda /mnt
 
 # Set the mirror
 echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
 # Install the base system
-#/usr/bin/pacstrap /mnt base base-devel openssh syslinux virtualbox-guest-utils
 /usr/bin/pacstrap /mnt base base-devel openssh syslinux virtualbox-guest-modules-arch virtualbox-guest-utils-nox puppet
 
 # Generate the fstab
@@ -52,7 +34,7 @@ echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacm
 /usr/bin/syslinux-install_update -i -a -m -c /mnt/
 
 # Configure syslinux
-uuid=$( /usr/bin/blkid -s UUID -o value /dev/mapper/arch-root )
+uuid=$( /usr/bin/blkid -s UUID -o value /dev/sda )
 /usr/bin/sed -i "s/APPEND root=.*/APPEND root=UUID=$uuid/g" /mnt/boot/syslinux/syslinux.cfg
 /usr/bin/sed -i "s/TIMEOUT 50/TIMEOUT 10/g" /mnt/boot/syslinux/syslinux.cfg
 
