@@ -10,7 +10,7 @@ mount /dev/sda /mnt
 echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
 # Install the base system
-/usr/bin/pacstrap /mnt base base-devel openssh syslinux virtualbox-guest-modules-arch virtualbox-guest-utils-nox puppet
+/usr/bin/pacstrap /mnt base sudo syslinux openssh virtualbox-guest-modules-arch virtualbox-guest-utils-nox puppet
 
 # Generate the fstab
 /usr/bin/genfstab -U /mnt > /mnt/etc/fstab
@@ -20,14 +20,13 @@ echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacm
 /usr/bin/echo '/usr/bin/locale-gen' | /usr/bin/arch-chroot /mnt /bin/bash
 
 # Setup time
-/usr/bin/ln -s /mnt/usr/share/zoneinfo/Europe/Brussels /mnt/etc/localtime
 /usr/bin/echo 'hwclock --systohc --utc' | /usr/bin/arch-chroot /mnt /bin/bash
 
 # Setup hostname
 /usr/bin/echo "arch-hostname" > /mnt/etc/hostname
 
 # Add lvm2 hook to HOOKS in /etc/mkinitcpio.conf
-/usr/bin/sed -i 's/^HOOKS=.*/HOOKS=\(base udev autodetect modconf block lvm2 filesystems keyboard fsck\)/g' /mnt/etc/mkinitcpio.conf
+/usr/bin/sed -i 's/^HOOKS=.*/HOOKS=\(base systemd autodetect modconf block filesystems keyboard\)/g' /mnt/etc/mkinitcpio.conf
 /usr/bin/echo 'mkinitcpio -p linux' | arch-chroot /mnt /bin/bash
 
 # Generate syslinux
@@ -53,8 +52,8 @@ chown -R vagrant:vagrant /mnt/home/vagrant/.ssh
 chmod -R go-rwsx /mnt/home/vagrant/.ssh
 
 # Needed for nfs
-echo 'Enable rpcbind.socket'
-systemctl --root /mnt enable rpcbind.socket
+#echo 'Enable rpcbind.socket'
+#systemctl --root /mnt enable rpcbind.socket
 
 # Networking
 echo 'Setup networking'
@@ -75,6 +74,9 @@ systemctl --root /mnt enable systemd-resolved
 rm /mnt/etc/resolv.conf
 ln -s /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf
 
+# Enable the vboxservice
+systemctl --root /mnt enable vboxservice
+
 # Enable sshd
 echo 'Enable sshd'
 sed -i 's/#UseDNS yes/UseDNS no/' /mnt/etc/ssh/sshd_config
@@ -82,43 +84,39 @@ systemctl --root /mnt enable sshd
 
 # Setup puppet
 echo 'Setup puppet'
-#config.vm.synced_folder "puppet/hiera/data", "/etc/hiera"
-#puppet.hiera_config_path = "puppet/hiera/hiera.yaml"
-#puppet.manifests_path = "puppet/manifests/"
-#puppet.module_path = "puppet/modules"
 mkdir -p /etc/puppet/{hiera,manifests,modules}
 
-# Get yaourt
-echo 'Setup yaourt'
-pacman -S git
-get_yaourt_setup='/mnt/home/vagrant/get_yaourt.sh'
-get_yaourt='/home/vagrant/get_yaourt.sh'
-
-cat << EOFyaourt > $get_yaourt_setup
-sudo pacman -S git --noconfirm
-git clone https://aur.archlinux.org/package-query.git
-cd package-query
-makepkg --noconfirm --noprogressbar -s &>/dev/null
-sudo pacman -U package-query-*.pkg.tar.xz --noconfirm
-cd ..
-rm package-query -rf
-
-git clone https://aur.archlinux.org/yaourt.git
-cd yaourt
-makepkg --noconfirm --noprogressbar -s &>/dev/null
-sudo pacman -U yaourt-*.pkg.tar.xz --noconfirm
-cd ..
-rm yaourt -rf
-EOFyaourt
-
-# Add the permissions
-chmod 0755 $get_yaourt
-
-# Execute as non-root user
-/usr/bin/echo "su - vagrant $get_yaourt" | arch-chroot /mnt /bin/bash
-
-# Clean up the script
-rm $get_yaourt_setup
+## Get yaourt
+#echo 'Setup yaourt'
+#pacman -S git
+#get_yaourt_setup='/mnt/home/vagrant/get_yaourt.sh'
+#get_yaourt='/home/vagrant/get_yaourt.sh'
+#
+#cat << EOFyaourt > $get_yaourt_setup
+#sudo pacman -S git --noconfirm
+#git clone https://aur.archlinux.org/package-query.git
+#cd package-query
+#makepkg --noconfirm --noprogressbar -s &>/dev/null
+#sudo pacman -U package-query-*.pkg.tar.xz --noconfirm
+#cd ..
+#rm package-query -rf
+#
+#git clone https://aur.archlinux.org/yaourt.git
+#cd yaourt
+#makepkg --noconfirm --noprogressbar -s &>/dev/null
+#sudo pacman -U yaourt-*.pkg.tar.xz --noconfirm
+#cd ..
+#rm yaourt -rf
+#EOFyaourt
+#
+## Add the permissions
+#chmod 0755 $get_yaourt
+#
+## Execute as non-root user
+#/usr/bin/echo "su - vagrant $get_yaourt" | arch-chroot /mnt /bin/bash
+#
+## Clean up the script
+#rm $get_yaourt_setup
 
 umount -R /mnt
 exit 0
