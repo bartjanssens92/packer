@@ -83,8 +83,8 @@ sed -i 's/#UseDNS yes/UseDNS no/' /mnt/etc/ssh/sshd_config
 systemctl --root /mnt enable sshd
 
 # Setup puppet
-echo 'Setup puppet'
-mkdir -p /etc/puppet/{hiera,manifests,modules}
+#echo 'Setup puppet'
+#mkdir -p /etc/puppet/{hiera,manifests,modules}
 
 ## Get yaourt
 #echo 'Setup yaourt'
