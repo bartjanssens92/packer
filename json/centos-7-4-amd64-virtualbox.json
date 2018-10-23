@@ -21,7 +21,7 @@
     "ssh_wait_timeout": "3600s",
     "ssh_pty" : "true",
 
-    "disk_size": 10240,
+    "disk_size": 15360,
     "vboxmanage": [
       ["modifyvm", "{{.Name}}", "--memory", "512"],
       ["modifyvm", "{{.Name}}", "--cpus", "1"]

@@ -18,4 +18,4 @@ mount -o loop /home/vagrant/VBoxGuestAdditions_$VERSION.iso /tmp/virtualbox
 sudo sh /tmp/virtualbox/VBoxLinuxAdditions.run
 umount /tmp/virtualbox
 rmdir /tmp/virtualbox
-#rm /home/vagrant/*.iso
+rm /home/vagrant/*.iso

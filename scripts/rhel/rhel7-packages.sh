@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # The repo url
-baseurl=''
+baseurl='https://svcgklman02.ctc.cegeka.be/repo/releases/7.3/x86_64/'
 
 # Check that it's not empty
 if [[ $baseurl == '' ]]; then echo "No repository provided, quiting!"; exit 1; fi
