@@ -3,8 +3,8 @@
     "type": "qemu",
     "headless": false,
 
-    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2017.04.01/archlinux-2017.04.01-x86_64.iso",
-    "iso_checksum": "aeed1a62fe2d812715a121ca93866995",
+    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2019.02.01/archlinux-2019.02.01-x86_64.iso",
+    "iso_checksum": "9e5023ac403a46ce06f6560867b88fe5",
     "iso_checksum_type": "md5",
 
     "net_device": "virtio-net",

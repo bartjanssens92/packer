@@ -5,8 +5,8 @@
 
     "guest_os_type": "ArchLinux_64",
 
-    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2018.05.01/archlinux-2018.05.01-x86_64.iso",
-    "iso_checksum": "7ad9699a64388c24c0a8a4eb2410c16b",
+    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2019.02.01/archlinux-2019.02.01-x86_64.iso",
+    "iso_checksum": "9e5023ac403a46ce06f6560867b88fe5",
     "iso_checksum_type": "md5",
 
     "boot_command": [
