@@ -5,8 +5,8 @@
     "headless": false,
 
     "guest_os_type": "Ubuntu_64",
-    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
-    "iso_checksum": "d2d939ca0e65816790375f6826e4032f",
+    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso",
+    "iso_checksum": "6a7f31eb125a0b2908cf2333d7777c82",
     "iso_checksum_type": "md5",
 
     "boot_command": [
@@ -49,6 +49,7 @@
 
   "provisioners": [{
     "type": "shell",
+    "expect_disconnect": true,
     "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'",
     "scripts": [
       "scripts/vboxguest.sh",
