@@ -29,6 +29,8 @@ echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacm
 /usr/bin/sed -i 's/^HOOKS=.*/HOOKS=\(base systemd autodetect modconf block filesystems keyboard\)/g' /mnt/etc/mkinitcpio.conf
 /usr/bin/echo 'mkinitcpio -p linux' | arch-chroot /mnt /bin/bash
 
+echo 'pacman -Qi linux' | arch-chroot /mnt /bin/bash
+
 # Generate syslinux
 /usr/bin/syslinux-install_update -i -a -m -c /mnt/
 
@@ -46,7 +48,7 @@ echo "echo 'vagrant:vagrant' | chpasswd" | arch-chroot /mnt /bin/bash
 echo 'Add the ssh key'
 mkdir /mnt/home/vagrant/.ssh
 echo 'vagrant  ALL=(ALL) NOPASSWD: ALL' >> /mnt/etc/sudoers
-wget --no-check-certificate -O authorized_keys 'https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub' -q
+wget --no-check-certificate -O authorized_keys 'https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub' -q
 mv authorized_keys /mnt/home/vagrant/.ssh/
 chown -R vagrant:vagrant /mnt/home/vagrant/.ssh
 chmod -R go-rwsx /mnt/home/vagrant/.ssh

@@ -5,9 +5,9 @@ mkdir /home/vagrant/.ssh
 echo 'Get the vagrant.pub key'
 if curl -h&>/dev/null
 then
-  curl -O -s 'https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub'
+  curl -O -s 'https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub'
 else
-  wget 'https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub'
+  wget 'https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub'
 fi
 echo 'Move the vagrant.pub to authorized_keys'
 mv vagrant.pub /home/vagrant/.ssh/authorized_keys
