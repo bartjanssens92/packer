@@ -11,7 +11,7 @@ echo 'nameserver 193.191.168.130' > /etc/resolv.conf
 echo 'Server = http://archlinux.mirror.kangaroot.net/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
 # Install the base system
-/usr/bin/pacstrap /mnt base sudo syslinux openssh puppet rsync mkinitcpio
+/usr/bin/pacstrap /mnt base linux systemd filesystem e2fsprogs btrfs-progs syslinux openssh puppet rsync mkinitcpio sudo netctl
 
 # Generate the fstab
 /usr/bin/genfstab -U /mnt > /mnt/etc/fstab
