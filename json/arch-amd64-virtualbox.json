@@ -5,8 +5,8 @@
 
     "guest_os_type": "ArchLinux_64",
 
-    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2019.08.01/archlinux-2019.08.01-x86_64.iso",
-    "iso_checksum": "e61fa65a87fe92f6fe506ce210036898",
+    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2019.12.01/archlinux-2019.12.01-x86_64.iso",
+    "iso_checksum": "bcee2d045f939729e3a90f65262e7367",
     "iso_checksum_type": "md5",
 
     "boot_command": [
@@ -40,7 +40,8 @@
     "type": "shell",
     "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'",
     "scripts": [
-      "scripts/arch/install_short.sh"
+      "scripts/arch/install_short.sh",
+      "scripts/test.sh"
     ]
   }]
 }

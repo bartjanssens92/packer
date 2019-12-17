@@ -1,19 +1,23 @@
 {
   "builders": [{
     "type": "qemu",
-    "headless": false,
+    "accelerator": "kvm",
+    "headless": true,
 
-    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2019.02.01/archlinux-2019.02.01-x86_64.iso",
-    "iso_checksum": "9e5023ac403a46ce06f6560867b88fe5",
+    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2019.12.01/archlinux-2019.12.01-x86_64.iso",
+    "iso_checksum": "bcee2d045f939729e3a90f65262e7367",
     "iso_checksum_type": "md5",
-
-    "net_device": "virtio-net",
-    "disk_interface": "virtio",
 
     "boot_command": [
       "<tab> script=http://{{ .HTTPIP }}:{{ .HTTPPort }}/arch/pre-install.sh<enter>"
     ],
     "boot_wait": "5s",
+    "qemuargs": [
+      ["-D","/tmp/crap.log"],
+      ["-d","guest_errors"]
+    ],
+
+    "disk_interface": "virtio-scsi",
 
     "http_directory": "http",
 
@@ -24,8 +28,6 @@
     "ssh_pty" : "true",
 
     "disk_size": 10240,
-    "format": "qcow2",
-    "accelerator": "kvm",
     "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now"
   }],
 
