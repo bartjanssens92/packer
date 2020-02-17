@@ -4,8 +4,8 @@
     "accelerator": "kvm",
     "headless": true,
 
-    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2019.12.01/archlinux-2019.12.01-x86_64.iso",
-    "iso_checksum": "bcee2d045f939729e3a90f65262e7367",
+    "iso_url": "http://archlinux.mirror.kangaroot.net/iso/2020.02.01/archlinux-2020.02.01-x86_64.iso",
+    "iso_checksum": "66e4f8f77adb5902f26fff3cfa6e8d96",
     "iso_checksum_type": "md5",
 
     "boot_command": [
@@ -32,7 +32,7 @@
   }],
 
   "post-processors": [{
-    "output": "build/arch-amd64-{{.Provider}}.box",
+    "output": "build/arch-amd64.box",
     "type": "vagrant"
   }],
 
